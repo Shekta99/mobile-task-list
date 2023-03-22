@@ -7,9 +7,7 @@ const loadTasks = async () => {
   tasks.forEach((task) => {
     taskList.push(task);
   });
-  if (taskList.length !== 0) {
-    printTasks(taskList);
-  }
+  printTasks(taskList);
 };
 
 const printTasks = (taskList) => {
@@ -31,8 +29,17 @@ const printTasks = (taskList) => {
     table.addEventListener("dragleave", () => {
       remove(element);
     });
-    table.addEventListener("touchstart", () => {
+    table.addEventListener("touchmove", (e) => {
+      const currentPos = e.touches[0].clientX;
+      const initalPos = Number(table.getAttribute("pos"));
+      const posDiference = initalPos - currentPos;
+      if (posDiference < -8) {
+        remove(element);
+      }
+    });
+    table.addEventListener("touchstart", (e) => {
       table.setAttribute("start", new Date());
+      table.setAttribute("pos", e.touches[0].clientX);
     });
     table.addEventListener("touchend", () => {
       console.log(Date.parse(table.getAttribute("start")) - new Date());
@@ -45,6 +52,11 @@ const printTasks = (taskList) => {
     });
     table.appendChild(tr);
     table.setAttribute("draggable", true);
+    if (element.done == true) {
+      table.style.background = "Green";
+    } else {
+      table.style.background = "Orange";
+    }
     list.appendChild(table);
   });
 };
@@ -66,6 +78,7 @@ const add = async () => {
   });
   if (response.status == 200) {
     await loadTasks();
+    field.value = "";
   }
   window.navigator.vibrate(100);
 };
